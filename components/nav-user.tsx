@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { createClient } from "@/lib/supabase/client"
+import { hasEnvVars } from "@/lib/utils"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
@@ -54,10 +55,15 @@ export function NavUser() {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
 
-  const supabase = createClient()
+  const supabase = React.useMemo(() => (hasEnvVars ? createClient() : null), [])
 
   React.useEffect(() => {
-    async function getUser() {
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
+    void (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
@@ -66,11 +72,11 @@ export function NavUser() {
       } finally {
         setLoading(false)
       }
-    }
-    getUser()
+    })()
   }, [supabase])
 
   const handleLogout = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
     router.refresh()
     router.push("/")

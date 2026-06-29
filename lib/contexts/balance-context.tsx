@@ -20,6 +20,7 @@
 
 import { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo, ReactNode } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { hasEnvVars } from "@/lib/utils"
 import { RealtimeChannel } from "@supabase/supabase-js"
 
 const GATEWAY_ADDRESS = "0x0077777d7EBA4688BDeF3E311b846F25870A19B9"
@@ -110,7 +111,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
   // Track processed transaction IDs to avoid duplicate processing
   const processedTxRef = useRef<Set<string>>(new Set())
 
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => (hasEnvVars ? createClient() : null), [])
 
   // Keep ref in sync
   useEffect(() => {
@@ -269,6 +270,12 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
 
   // Single Realtime subscription for the entire app
   useEffect(() => {
+    if (!supabase) {
+      setIsLoadingGateway(false)
+      setIsLoadingWallet(false)
+      return
+    }
+
     let channel: RealtimeChannel | null = null
 
     const setupData = async () => {

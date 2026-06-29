@@ -18,8 +18,9 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { hasEnvVars } from "@/lib/utils";
 import { toast } from "sonner";
 import { IconLoader2 } from "@tabler/icons-react";
 
@@ -31,15 +32,13 @@ type PendingTransaction = {
   blockchain: string;
 };
 
-import { useMemo } from "react";
-
 export function BridgeMonitor() {
   const [pendingTxs, setPendingTxs] = useState<PendingTransaction[]>([]);
-  // Use useMemo to ensure supabase client instance remains stable across renders
-  // to prevent unnecessary effect re-execution
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => (hasEnvVars ? createClient() : null), []);
 
   useEffect(() => {
+    if (!supabase) return;
+
     const checkPendingTransactions = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;

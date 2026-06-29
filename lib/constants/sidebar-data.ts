@@ -21,6 +21,7 @@ import {
   IconListDetails,
   IconWallet,
   IconShieldCheck,
+  IconSend,
 } from "@tabler/icons-react"
 
 export const sidebarData = {
@@ -34,6 +35,11 @@ export const sidebarData = {
       title: "Dashboard",
       url: "/dashboard",
       icon: IconDashboard,
+    },
+    {
+      title: "Send Money",
+      url: "/dashboard/send-money",
+      icon: IconSend,
     },
     {
       title: "Activity",

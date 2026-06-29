@@ -18,18 +18,28 @@
 
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
+let supabaseAdmin: SupabaseClient | null = null;
+
+function getSupabaseAdmin() {
+  if (supabaseAdmin) return supabaseAdmin;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase admin credentials are not configured");
+  }
+
+  supabaseAdmin = createClient(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-);
+  });
+
+  return supabaseAdmin;
+}
 
 type CircleNotification = {
   id: string;
@@ -124,7 +134,7 @@ export async function POST(req: NextRequest) {
             updateData.tx_hash = txHash;
           }
           
-          const standardQuery = supabaseAdmin
+          const standardQuery = getSupabaseAdmin()
             .from("transactions")
             .update(updateData)
             .eq("circle_transaction_id", notification.id);
@@ -150,7 +160,7 @@ export async function POST(req: NextRequest) {
               updated_at: new Date().toISOString(),
             };
             
-            const rebalanceQuery = supabaseAdmin
+            const rebalanceQuery = getSupabaseAdmin()
               .from("transactions")
               .update(rebalanceUpdateData)
               .eq("tx_hash", txHash)

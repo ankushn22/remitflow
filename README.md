@@ -1,121 +1,168 @@
-# Arc Fintech Starter App
+# RemitFlow
 
-Modern multi-chain treasury management system. This sample application uses Next.js, Supabase, and Circle Developer Controlled Wallets, Circle Gateway and Circle Bridge Kit with Forwarding Service to demonstrate a multi-chain treasury management system with bridge capabilities.
+**Instant UAE → Global remittances with USDC settlement on Arc**
 
-<img width="830" height="467" alt="Fintech Starter App dashboard" src="public/screenshot.png" />
+RemitFlow is a hackathon submission for the [Stablecoin Commerce Stack Challenge](https://arc.io) — **Track 1: Best Cross-Border Payments & Remittances Experience (UAE → Global)**.
 
-## Table of Contents
+Pay in AED, settle in USDC on Arc with sub-second confirmation. Built with Circle Wallets, Gateway, CCTP/Bridge Kit, and Arc testnet.
 
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [How It Works](#how-it-works)
-- [Environment Variables](#environment-variables)
-- [User Accounts](#user-accounts)
+> **For educational and testnet demo purposes only.**
+
+## Hackathon Submission
+
+| Field | Value |
+|-------|-------|
+| **Title** | RemitFlow — Instant UAE Remittances on Arc |
+| **Track** | Cross-Border Payments & Remittances (UAE → Global) |
+| **Circle Products** | USDC, Wallets, Gateway, CCTP/Bridge Kit |
+| **Architecture** | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+
+## Features
+
+- **UAE remittance corridors** — India, Pakistan, Philippines, Bangladesh, Egypt, Nepal
+- **Pay in AED, settle in USDC** — familiar sender UX with transparent fee breakdown
+- **Circle Gateway routing** — unified USDC balance for treasury payouts
+- **CCTP / Bridge Kit** — cross-chain USDC movement to Arc
+- **Sub-second settlement** — Arc deterministic finality with live settlement tracker
+- **Compliance screening** — recipient address screening before send
+- **Remittance receipts** — on-chain confirmation + in-app receipt
 
 ## Prerequisites
 
-- **Node.js v22+** — Install via [nvm](https://github.com/nvm-sh/nvm)
-- **Supabase CLI** — Install via `npm install -g supabase` or see [Supabase CLI docs](https://supabase.com/docs/guides/cli/getting-started)
-- **Docker Desktop** (only if using the local Supabase path) — [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- Circle Developer Controlled Wallets **[API key](https://console.circle.com/signin)** and **[Entity Secret](https://developers.circle.com/wallets/dev-controlled/register-entity-secret)**
+- **Node.js v22+**
+- **Supabase** — [local Docker](https://supabase.com/docs/guides/cli) or [cloud project](https://supabase.com/)
+- **Circle Developer Account** — [console.circle.com](https://console.circle.com/signup)
+  - API key
+  - [Entity Secret](https://developers.circle.com/wallets/dev-controlled/register-entity-secret)
 
-## Getting Started
+## Quick Start
 
-1. Clone the repository and install dependencies:
+```bash
+git clone <your-repo-url>
+cd remitflow
+npm install
+cp .env.example .env.local
+# Fill in Supabase + Circle credentials in .env.local
+```
 
-   ```bash
-   git clone git@github.com:akelani-circle/fintech-starter.git
-   cd fintech-starter
-   npm install
-   ```
+### Database setup
 
-2. Set up environment variables:
+**Local Supabase (Docker):**
+```bash
+npx supabase start
+npx supabase migration up
+```
 
-   ```bash
-   cp .env.example .env.local
-   ```
-   Replace `your-ngrok-url` with your actual ngrok forwarding URL from step 4.
+**Remote Supabase:**
+```bash
+npx supabase link --project-ref <your-project-ref>
+npx supabase db push
+```
 
-   Then edit `.env.local` and fill in all required values (see [Environment Variables](#environment-variables) section below).
+### Run locally
 
-3. Set up the database — Choose one of the two paths below:
+```bash
+npm run dev
+```
 
-   <details>
-   <summary><strong>Path 1: Local Supabase (Docker)</strong></summary>
-
-   Requires Docker Desktop installed and running.
-
-   ```bash
-   npx supabase start
-   npx supabase migration up
-   ```
-
-   The output of `npx supabase start` will display the Supabase URL and API keys needed for your `.env.local`.
-
-   </details>
-
-   <details>
-   <summary><strong>Path 2: Remote Supabase (Cloud)</strong></summary>
-
-   Requires a [Supabase](https://supabase.com/) account and project.
-
-   ```bash
-   npx supabase link --project-ref <your-project-ref>
-   npx supabase db push
-   ```
-
-   Retrieve your project URL and API keys from the Supabase dashboard under **Settings → API**.
-
-   </details>
-
-4. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The app will be available at `http://localhost:3000`.
-
-## How It Works
-
-- Built with [Next.js](https://nextjs.org/) App Router and [Supabase](https://supabase.com/)
-- Uses [Circle Developer Controlled Wallets](https://developers.circle.com/wallets/dev-controlled) for managing multi-chain transactions
-- Utilizes `@circle-fin/bridge-kit` for bridging assets across supported chains
-- Real-time UI updates powered by Supabase Realtime subscriptions
-- Styled with [Tailwind CSS](https://tailwindcss.com) and components from [shadcn/ui](https://ui.shadcn.com/)
+Open [http://localhost:3000](http://localhost:3000) → Sign up → **Send Money**.
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the required values:
-
 ```bash
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-project-url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-or-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
 # Circle
-CIRCLE_API_KEY=your-circle-api-key
-CIRCLE_ENTITY_SECRET=your-circle-entity-secret
+CIRCLE_API_KEY=
+CIRCLE_ENTITY_SECRET=
 ```
 
-| Variable | Scope | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Public | Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public | Supabase anonymous/publishable key. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side | Supabase service role key for admin operations. |
-| `CIRCLE_API_KEY` | Server-side | Circle API key for wallet operations. |
-| `CIRCLE_ENTITY_SECRET` | Server-side | Circle entity secret for signing transactions. |
+## Circle Integration Guide
 
-## User Accounts
+### 1. Circle Wallets (Developer-Controlled)
 
-### Default Account
+- Wallets created via `/api/wallet` on first login
+- Used for sender treasury and recipient Arc addresses
+- Docs: [developers.circle.com/wallets/dev-controlled](https://developers.circle.com/wallets/dev-controlled)
 
-On first visit, sign up with any email and password.
+### 2. Circle Gateway
 
-## Security & Usage Model
+- Unified USDC balance aggregated across chains
+- Remittance payouts sourced from Gateway via `/api/payout`
+- Docs: [developers.circle.com/gateway](https://developers.circle.com/gateway)
 
-This sample application:
-- Assumes testnet usage only
-- Handles secrets via environment variables
-- Is not intended for production use without modification
+### 3. CCTP / Bridge Kit
+
+- Cross-chain USDC transfers when source liquidity is not on Arc
+- Integrated in payout routing and rebalance flows
+- Docs: [developers.circle.com/cctp](https://developers.circle.com/cctp)
+
+### 4. Arc Testnet
+
+- Chain ID: `5042002`
+- USDC as gas token — predictable dollar-denominated fees
+- Docs: [docs.arc.io](https://docs.arc.io/)
+
+## Project Structure
+
+```
+remitflow/
+├── app/
+│   ├── dashboard/send-money/   # Main remittance flow
+│   └── api/                    # Circle + Supabase APIs
+├── components/
+│   ├── remittance-send-form.tsx
+│   ├── fee-breakdown.tsx
+│   └── settlement-tracker.tsx
+├── lib/constants/
+│   └── remittance-corridors.ts # UAE → Global corridors
+└── docs/
+    └── ARCHITECTURE.md         # Submission architecture diagram
+```
+
+## Demo Script (Video)
+
+1. Show problem: UAE expat remittances cost 5–7% and take days
+2. Open RemitFlow → select UAE → India corridor
+3. Enter 500 AED → show transparent fee breakdown
+4. Enter recipient name + Arc wallet address
+5. Send → watch real-time settlement tracker
+6. Show receipt with sub-second Arc confirmation
+7. Highlight Circle products: Wallets, Gateway, CCTP, Arc USDC
+
+## Circle Product Feedback
+
+### Why we chose these products
+
+- **Circle Wallets** — UAE senders and global recipients need embedded wallets without seed phrases or crypto jargon.
+- **Circle Gateway** — Remittances require routing unified USDC liquidity across chains; Gateway eliminates manual per-chain treasury management.
+- **CCTP / Bridge Kit** — Many senders hold USDC on Ethereum/Base; CCTP provides native burn-and-mint cross-chain movement to Arc settlement.
+- **USDC on Arc** — Predictable gas fees and sub-second finality are essential for remittance UX where cost certainty and instant confirmation matter.
+
+### What worked well
+
+- Arc-fintech starter provided working Gateway + Bridge Kit + Wallets integration out of the box.
+- Gateway unified balance simplified payout source selection for cross-chain remittances.
+- Arc testnet finality is genuinely fast — excellent for demoing "instant remittance" narrative.
+- Developer-controlled wallets API is well-documented for server-side payout flows.
+
+### What could be improved
+
+- Testnet faucet / funding flow could be more discoverable for hackathon participants.
+- Bridge Kit error messages could surface more actionable recovery steps when cross-chain liquidity is insufficient.
+- StableFX integration docs would help build stronger "Pay in AED" production flows (we used conceptual AED UX for demo).
+- A dedicated remittance/quickstart template in Arc docs would accelerate UAE corridor projects.
+
+### Recommendations
+
+- Publish an official "Remittance on Arc" quickstart combining Wallets + Gateway + CCTP in one tutorial.
+- Add corridor-specific fee estimation helpers to Gateway SDK.
+- Provide a hackathon-ready testnet USDC faucet linked from Arc House event pages.
+- Consider a Nanopayments example for micro-remittance corridors in future docs.
+
+## License
+
+Apache-2.0 — based on [circlefin/arc-fintech](https://github.com/circlefin/arc-fintech).

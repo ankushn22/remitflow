@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <a href="/dashboard">
                 <IconInnerShadowTop className="size-5!" />
                 <span className="bg-gradient-to-r from-blue-600 to-amber-600 bg-clip-text text-transparent font-bold text-xl">
-                  Circle Fintech Starter
+                  RemitFlow
                 </span>
               </a>
             </SidebarMenuButton>

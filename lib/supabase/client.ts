@@ -18,9 +18,13 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 
+const BUILD_PLACEHOLDER_URL = "https://placeholder.supabase.co";
+const BUILD_PLACEHOLDER_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.build-placeholder";
+
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || BUILD_PLACEHOLDER_URL;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || BUILD_PLACEHOLDER_KEY;
+
+  return createBrowserClient(url, key);
 }

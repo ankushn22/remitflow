@@ -36,6 +36,7 @@ import { SectionCards } from "@/components/section-cards"
 import { SendButton } from "@/components/send-button"
 import { TransferDialog } from "@/components/transfer-dialog"
 import { Button } from "@/components/ui/button"
+import { IconSend } from "@tabler/icons-react"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -506,6 +507,7 @@ export default function Page() {
       <div className="flex flex-col mb-4">
         <div className="flex items-center justify-between mb-4">
           <div>
+            <p className="text-sm text-muted-foreground mb-1">RemitFlow · UAE → Global</p>
             <h3 className="scroll-m-20 text-3xl tracking-tight flex items-center">
               <span className="mr-2">Balance</span>
               {!isLoadingWallet ? (
@@ -540,6 +542,12 @@ export default function Page() {
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3 mb-4 md:mb-6">
+        <Button asChild>
+          <Link href="/dashboard/send-money">
+            <IconSend className="mr-2 size-4" />
+            Send remittance
+          </Link>
+        </Button>
         <TransferDialog />
         <SendButton />
         <RebalanceButton />

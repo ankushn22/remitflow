@@ -34,7 +34,7 @@ export default function Home() {
               <ThemeSwitcher />
               <Link href={"/"} className="flex items-center gap-2">
                 <span className="bg-gradient-to-r from-blue-600 to-amber-600 bg-clip-text text-transparent font-bold text-xl">
-                  Circle Fintech Starter
+                  RemitFlow
                 </span>
               </Link>
             </div>
