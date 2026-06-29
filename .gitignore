@@ -42,3 +42,4 @@ yarn-error.log*
 next-env.d.ts
 build-out.txt
 build.log
+.github/workflows/
