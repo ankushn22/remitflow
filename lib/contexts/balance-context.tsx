@@ -36,6 +36,8 @@ type Wallet = {
   address: string
   circle_wallet_id: string
   blockchain: string
+  name?: string
+  type?: string
 }
 
 type Transaction = {
@@ -67,6 +69,7 @@ type BalanceContextType = {
 
   // Wallets list
   wallets: Wallet[]
+  walletsReady: boolean
 
   // Manual refresh functions (for dialogs, etc.)
   refreshGatewayBalance: () => Promise<void>
@@ -101,6 +104,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
   const [walletBalances, setWalletBalances] = useState<Record<string, string>>({})
   const [walletTotal, setWalletTotal] = useState(0)
   const [isLoadingWallet, setIsLoadingWallet] = useState(true)
+  const [walletsReady, setWalletsReady] = useState(false)
 
   // Debounce and cooldown refs
   const gatewayDebounceRef = useRef<NodeJS.Timeout | null>(null)
@@ -273,6 +277,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
     if (!supabase) {
       setIsLoadingGateway(false)
       setIsLoadingWallet(false)
+      setWalletsReady(true)
       return
     }
 
@@ -281,12 +286,15 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
     const setupData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+        if (!user) {
+          setWalletsReady(true)
+          return
+        }
 
         // Fetch initial wallets
         const { data: walletsData, error } = await supabase
           .from("wallets")
-          .select("id, address, circle_wallet_id, blockchain")
+          .select("id, address, circle_wallet_id, blockchain, name, type")
           .eq("user_id", user.id)
 
         if (error) throw error
@@ -294,6 +302,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
         const initialWallets = (walletsData || []) as Wallet[]
         setWallets(initialWallets)
         walletsRef.current = initialWallets
+        setWalletsReady(true)
 
         // Fetch initial balances
         await Promise.all([
@@ -392,6 +401,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
         console.error("Error setting up balance context:", error)
         setIsLoadingGateway(false)
         setIsLoadingWallet(false)
+        setWalletsReady(true)
       }
     }
 
@@ -420,6 +430,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
         isLoadingGateway,
         isLoadingWallet,
         wallets,
+        walletsReady,
         refreshGatewayBalance,
         refreshWalletBalance,
       }}

@@ -19,7 +19,6 @@
 "use client"
 
 import * as React from "react"
-import { createClient } from "@/lib/supabase/client"
 import {
   Select,
   SelectContent,
@@ -27,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { toast } from "sonner"
 import { useBalanceContext } from "@/lib/contexts/balance-context"
 
 export type WalletOption = {
@@ -66,47 +64,25 @@ export function WalletSelect({
   excludeArcWallets = false,
   minBalance,
 }: WalletSelectProps) {
-  const [wallets, setWallets] = React.useState<WalletOption[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
-  const supabase = createClient()
-  
-  // Try to access balance context, handle if it's not available
-  let walletBalances: Record<string, string> = {}
-  try {
-    // eslint-disable-next-line
-    const context = useBalanceContext()
-    walletBalances = context.walletBalances
-  } catch (e) {
-    // Ignore error if context is missing
-  }
+  const { wallets, walletBalances, walletsReady, refreshWalletBalance } =
+    useBalanceContext()
 
+  // Refresh balances when the select opens so minBalance filters stay accurate
   React.useEffect(() => {
-    const fetchWallets = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { data, error } = await supabase
-          .from("wallets")
-          .select("id, address, circle_wallet_id, blockchain, name, type")
-          .eq("user_id", user.id)
-
-        if (error) throw error
-        setWallets(data || [])
-      } catch (error) {
-        console.error("Error fetching wallets:", error)
-        toast.error("Failed to load wallets")
-      } finally {
-        setIsLoading(false)
-      }
+    if (walletsReady && wallets.length > 0) {
+      void refreshWalletBalance()
     }
+  }, [walletsReady, wallets.length, refreshWalletBalance])
 
-    fetchWallets()
-  }, [supabase])
-
-  // Filter wallets based on chain and excluded address, and deduplicate by address
   const displayedWallets = React.useMemo(() => {
-    let result = wallets
+    let result: WalletOption[] = wallets.map((wallet) => ({
+      id: wallet.id,
+      address: wallet.address,
+      circle_wallet_id: wallet.circle_wallet_id,
+      blockchain: wallet.blockchain,
+      name: wallet.name ?? "Wallet",
+      type: wallet.type,
+    }))
 
     if (chainFilter) {
       result = result.filter((w) => w.blockchain === chainFilter)
@@ -138,22 +114,28 @@ export function WalletSelect({
       })
     }
 
-    // Deduplicate wallets by address + blockchain combination to prevent duplicate keys
-    // Same address on different chains are different wallets, so we need both
     const seen = new Set<string>()
     result = result.filter((wallet) => {
       const key = `${wallet.address.toLowerCase()}-${wallet.blockchain.toLowerCase()}`
-      if (seen.has(key)) {
-        return false
-      }
+      if (seen.has(key)) return false
       seen.add(key)
       return true
     })
 
     return result
-  }, [wallets, chainFilter, excludeChain, excludeAddress, excludeGatewaySigner, excludeArcWallets, minBalance, walletBalances])
+  }, [
+    wallets,
+    chainFilter,
+    excludeChain,
+    excludeAddress,
+    excludeGatewaySigner,
+    excludeArcWallets,
+    minBalance,
+    walletBalances,
+  ])
 
-  // Helper to format chain names nicely
+  const isLoading = !walletsReady
+
   const formatChainName = (chain: string) => {
     return chain
       .split("-")
@@ -165,13 +147,11 @@ export function WalletSelect({
     <Select
       value={value}
       onValueChange={(val) => {
-        // Pass the full composite value to the parent's onValueChange
         onValueChange(val)
-        
+
         if (onSelectWallet) {
-          // Find wallet by the full composite value for accuracy
-          const selected = displayedWallets.find((w) => 
-            `${w.address}-${w.blockchain}` === val
+          const selected = displayedWallets.find(
+            (w) => `${w.address}-${w.blockchain}` === val
           )
           if (selected) {
             onSelectWallet(selected)
@@ -185,8 +165,8 @@ export function WalletSelect({
       </SelectTrigger>
       <SelectContent>
         {displayedWallets.map((wallet) => (
-          <SelectItem 
-            key={wallet.id} 
+          <SelectItem
+            key={wallet.id}
             value={`${wallet.address}-${wallet.blockchain}`}
           >
             <div className="flex items-center justify-between gap-2 w-full">
@@ -195,7 +175,8 @@ export function WalletSelect({
               </span>
               <span className="text-muted-foreground text-xs truncate max-w-[200px]">
                 {wallet.name} ({formatChainName(wallet.blockchain)})
-                {walletBalances[wallet.circle_wallet_id] && ` - ${walletBalances[wallet.circle_wallet_id].split(" ")[0]}`}
+                {walletBalances[wallet.circle_wallet_id] &&
+                  ` - ${walletBalances[wallet.circle_wallet_id].split(" ")[0]}`}
               </span>
             </div>
           </SelectItem>

@@ -350,12 +350,22 @@ export function TransferDialog() {
               )}
 
               {/* Review Warning */}
-              {needsReview && showReviewWarning && (
+                {needsReview && showReviewWarning && (
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
                     This address requires manual review. By proceeding, you acknowledge the
                     risk and take responsibility for this transaction.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {sourceWallet && (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Need two wallets on the same chain for internal transfer. If you only have
+                    one, create another wallet on {sourceWallet.blockchain.replace(/-/g, " ")} first.
                   </AlertDescription>
                 </Alert>
               )}
